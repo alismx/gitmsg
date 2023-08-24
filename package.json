@@ -1,0 +1,28 @@
+{
+  "name": "gitmsg",
+  "version": "1.0.0",
+  "description": "Use openai to generate commit messages from a diff",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "^18.16.3",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "openai": "^3.2.1"
+  },
+  "scripts": { 
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/alismx/gitmsg.git"
+  },
+  "author": "alismx",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alismx/gitmsg/issues"
+  },
+  "homepage": "https://github.com/alismx/gitmsg#readme"
+}

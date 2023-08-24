@@ -1,0 +1,3 @@
+# gitmsg
+
+- npm run build
