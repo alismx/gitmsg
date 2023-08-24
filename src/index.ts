@@ -60,17 +60,20 @@ async function main() {
         {
             role: "user",
             content:
-                'The above is the result of `git diff`. Please provide a commit message, adhering to "conventional commits" for this change',
+                'The above is the result of `git diff`. Please provide a commit message, adhering to "conventional commits" for this change. Only include the commit message text. Do not include information about commit messages or how to compose commit messages.',
         },
     ]);
     const commitMsg = response.result.message?.content?.trim();
     if (!commitMsg) {
         throw new Error("No commit message from GPT");
     }
-    console.info(`\nCommitting with:\n\n ${commitMsg}\n`);
+    console.info("\n--------------------\n");
+    console.info("Committing with:");
+    console.info(commitMsg);
+    console.info("\n--------------------\n");
     await execHelper("git commit -F -", commitMsg);
     console.info(`\nIf you need to modify the commit, run git commit --amend\n`);
-    console.info(`\nIf you want to regenerate a new commit, run git reset --soft HEAD~1 && gitmsg\n`);
+    console.info(`If you want to regenerate a new commit, run git reset --soft HEAD~1 && gitmsg\n`);
 }
 
 main().catch((e) => console.error(e));
