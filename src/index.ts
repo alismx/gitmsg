@@ -34,8 +34,18 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
     });
 }
 
-async function getChatCompletion(messages: ChatCompletionRequestMessage[]) {
+async function getChatCompletion(diff: string, prompt: string) {
     const openai = new OpenAIApi(new Configuration({ apiKey: GITMSG_OPENAI_API_KEY }));
+    const messages = [
+        {
+            role: "user",
+            content: diff,
+        },
+        {
+            role: "user",
+            content: prompt
+        },
+    ] as ChatCompletionRequestMessage[];
     const {
         data: {
             choices: [result],
@@ -48,28 +58,17 @@ async function getChatCompletion(messages: ChatCompletionRequestMessage[]) {
     return { result, rest };
 }
 
-async function main() {
-    const diff = await execHelper("git diff --staged");
-    const prompt = GITMSG_PROMPT
+async function handleGitdiff(diff?: string) {
     if (!diff) {
         console.info("No staged changes to commit");
         process.exit(0);
-    } else {
-        console.info("\ndiff:\n");
-        console.info(diff);
-        console.info("\n--------------------\n");
     }
-    const response = await getChatCompletion([
-        {
-            role: "user",
-            content: diff,
-        },
-        {
-            role: "user",
-            content: prompt
-        },
-    ]);
-    const commitMsg = response.result.message?.content?.trim();
+    console.info("\ndiff:\n");
+    console.info(diff);
+    console.info("\n--------------------\n");
+}
+
+async function handleGitCommit(commitMsg?: string) {
     if (!commitMsg) {
         throw new Error("No commit message from openai");
     }
@@ -79,6 +78,15 @@ async function main() {
     await execHelper("git commit -F -", commitMsg);
     console.info(`\nIf you need to modify the commit, run git commit --amend\n`);
     console.info(`If you want to regenerate a new commit, run git reset --soft HEAD~1 && gitmsg\n`);
+}
+
+async function main() {
+    const diff = await execHelper("git diff --staged");
+    const prompt = GITMSG_PROMPT || ""
+    await handleGitdiff(diff);
+    const response = await getChatCompletion(diff, prompt);
+    const commitMsg = response.result.message?.content?.trim();
+    await handleGitCommit(commitMsg);
 }
 
 main().catch((e) => console.error(e));
