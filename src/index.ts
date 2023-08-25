@@ -54,6 +54,10 @@ async function main() {
     if (!diff) {
         console.info("No staged changes to commit");
         process.exit(0);
+    } else {
+        console.info("\ndiff:\n");
+        console.info(diff);
+        console.info("\n--------------------\n");
     }
     const response = await getChatCompletion([
         {
@@ -67,10 +71,9 @@ async function main() {
     ]);
     const commitMsg = response.result.message?.content?.trim();
     if (!commitMsg) {
-        throw new Error("No commit message from GPT");
+        throw new Error("No commit message from openai");
     }
-    console.info("\n--------------------\n");
-    console.info("gitmsg:");
+    console.info("Commit Message:");
     console.info(commitMsg);
     console.info("\n--------------------\n");
     await execHelper("git commit -F -", commitMsg);
