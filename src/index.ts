@@ -58,7 +58,8 @@ async function getChatCompletion(diff: string, prompt: string) {
     return { result, rest };
 }
 
-async function handleGitdiff(diff?: string) {
+async function handleGitdiff() {
+    const diff = await execHelper("git diff --staged");
     if (!diff) {
         console.info("No staged changes to commit");
         process.exit(0);
@@ -66,6 +67,7 @@ async function handleGitdiff(diff?: string) {
     console.info("\ndiff:\n");
     console.info(diff);
     console.info("\n--------------------\n");
+    return diff;
 }
 
 async function handleGitCommit(commitMsg?: string) {
@@ -81,12 +83,9 @@ async function handleGitCommit(commitMsg?: string) {
 }
 
 async function main() {
-    const diff = await execHelper("git diff --staged");
-    const prompt = GITMSG_PROMPT || ""
-    await handleGitdiff(diff);
-    const response = await getChatCompletion(diff, prompt);
-    const commitMsg = response.result.message?.content?.trim();
-    await handleGitCommit(commitMsg);
+    const diff = await handleGitdiff();
+    const openaiResponse = await getChatCompletion(diff, GITMSG_PROMPT || "");
+    await handleGitCommit(openaiResponse.result.message?.content?.trim());
 }
 
 main().catch((e) => console.error(e));
