@@ -1,6 +1,7 @@
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 import { exec } from "child_process";
 
+const { GITMSG_OPENAI_API_KEY, GITMSG_PROMPT } = process.env;
 
 /**
  * Executes a shell command and returns the output as a Promise. Optionally accepts stdin input.
@@ -34,7 +35,7 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
 }
 
 async function getChatCompletion(messages: ChatCompletionRequestMessage[]) {
-    const openai = new OpenAIApi(new Configuration({ apiKey: process.env.GITMSG_OPENAI_API_KEY }));
+    const openai = new OpenAIApi(new Configuration({ apiKey: GITMSG_OPENAI_API_KEY }));
     const {
         data: {
             choices: [result],
@@ -49,7 +50,7 @@ async function getChatCompletion(messages: ChatCompletionRequestMessage[]) {
 
 async function main() {
     const diff = await execHelper("git diff --staged");
-    const prompt = 'The above is the result of `git diff`. Please provide a commit message, adhering to "conventional commits" for this change. Only include the commit message text. Do not include information about commit messages or how to compose commit messages.'
+    const prompt = GITMSG_PROMPT
     if (!diff) {
         console.info("No staged changes to commit");
         process.exit(0);
@@ -69,7 +70,7 @@ async function main() {
         throw new Error("No commit message from GPT");
     }
     console.info("\n--------------------\n");
-    console.info("Committing with:");
+    console.info("gitmsg:");
     console.info(commitMsg);
     console.info("\n--------------------\n");
     await execHelper("git commit -F -", commitMsg);
