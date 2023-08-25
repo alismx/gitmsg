@@ -25,7 +25,7 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
             stdout += data;
         });
         child.on("close", (code) => {
-            if (code) {
+            if (code !== 0) {
                 reject();
             } else {
                 resolve(stdout);
