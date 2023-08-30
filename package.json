@@ -4,14 +4,16 @@
   "description": "Use openai to generate commit messages from a diff",
   "main": "index.js",
   "devDependencies": {
+    "@types/minimist": "^1.2.2",
     "@types/node": "^18.16.3",
+    "minimist": "^1.2.8",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "openai": "^3.2.1"
   },
-  "scripts": { 
+  "scripts": {
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

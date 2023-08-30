@@ -1,5 +1,6 @@
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 import { exec } from "child_process";
+import minimist = require("minimist");
 
 const { GITMSG_OPENAI_API_KEY, GITMSG_PROMPT } = process.env;
 
@@ -78,14 +79,43 @@ async function handleGitCommit(commitMsg?: string) {
     console.info(commitMsg);
     console.info("\n--------------------\n");
     await execHelper("git commit -F -", commitMsg);
-    console.info(`\nIf you need to modify the commit, run git commit --amend\n`);
-    console.info(`If you want to regenerate a new commit, run git reset --soft HEAD~1 && gitmsg\n`);
+    console.info(`\nIf you need to modify the commit, run gitmsg --amend\n`);
+    console.info(`If you want to regenerate a new commit, run gitmsg --undo && gitmsg\n`);
+}
+
+async function handleGitAmend() {
+    await execHelper("git commit --amend --no-edit");
 }
 
 async function main() {
+    var args = minimist(process.argv.slice(2));
+    console.log(args);
+    if (args.help) {
+        console.info(`
+        Usage: gitmsg [options]
+        
+        Options:
+        --help, -h      Show this help message
+        --amend, -a     Amend the last commit
+        --undo, -u      Undo the last commit
+        `);
+        process.exit(0);
+    }
+    if (args.amend) {
+        console.info("Running gitmsg --amend");
+        await handleGitAmend();
+        process.exit(0);
+    }
+    if (args.undo) {
+        console.info("Running gitmsg --undo");
+        await execHelper("git reset --soft HEAD~1");
+        process.exit(0);
+    }
+    console.info("Running gitmsg");
     const diff = await handleGitdiff();
     const openaiResponse = await getChatCompletion(diff, GITMSG_PROMPT || "");
     await handleGitCommit(openaiResponse.result.message?.content?.trim());
+    process.exit(0);
 }
 
 main().catch((e) => console.error(e));
