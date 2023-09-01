@@ -1,6 +1,6 @@
 {
-  "name": "gitmsg",
-  "version": "1.0.0",
+  "name": "@alismx/gitmsg",
+  "version": "0.0.1",
   "description": "Use openai to generate commit messages from a diff",
   "main": "index.js",
   "devDependencies": {
@@ -25,6 +25,9 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/alismx/gitmsg/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "homepage": "https://github.com/alismx/gitmsg#readme"
 }
