@@ -2,7 +2,7 @@ import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 import { exec } from "child_process";
 import minimist = require("minimist");
 
-const { GITMSG_OPENAI_API_KEY, GITMSG_PROMPT } = process.env;
+const { GITMSG_OPENAI_API_KEY, GITMSG_COMMIT_PROMPT, GITMSG_PR_PROMPT } = process.env;
 
 /**
  * Executes a shell command and returns the output as a Promise. Optionally accepts stdin input.
@@ -16,7 +16,7 @@ const { GITMSG_OPENAI_API_KEY, GITMSG_PROMPT } = process.env;
 async function execHelper(command: string, stdin?: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const child = exec(command);
-        console.info(`Running: ${command}`);
+        console.log(`Running: ${command}`);
         if (stdin) {
             child.stdin?.write(stdin);
             child.stdin?.end();
@@ -37,16 +37,16 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
 
 async function getChatCompletion(diff: string, prompt: string) {
     const openai = new OpenAIApi(new Configuration({ apiKey: GITMSG_OPENAI_API_KEY }));
-    const messages = [
+    const messages: ChatCompletionRequestMessage[] = [
         {
             role: "user",
             content: diff,
         },
         {
             role: "user",
-            content: prompt
+            content: prompt,
         },
-    ] as ChatCompletionRequestMessage[];
+    ];
     const {
         data: {
             choices: [result],
@@ -59,15 +59,32 @@ async function getChatCompletion(diff: string, prompt: string) {
     return { result, rest };
 }
 
-async function handleGitdiff() {
-    const diff = await execHelper("git diff --staged");
+async function gitDiffBranchCommand(args?: any) {
+    const branch = args.branch ? args.branch : "origin/main";
+    console.log(`args.pr.length ${args.pr.length}`)
+    console.log(`args.pr ${args.pr}`)
+    const files = args.pr.length > 0 ? `${args.pr} ${args._}` : ".";
+    return `git diff ${branch} ${files}`;
+}
+
+async function GitDiffStagedCommand() {
+    return `git diff --staged`;
+}
+
+async function handleGitDiff(Command: string) {
+    const diff = await execHelper(Command);
+    displayDiff(diff);
+    return diff;
+}
+
+async function displayDiff(diff: string) {
     if (!diff) {
-        console.info("No staged changes to commit");
+        console.log("No diff found. Exiting.");
         process.exit(0);
     }
-    console.info("\ndiff:\n");
-    console.info(diff);
-    console.info("\n--------------------\n");
+    console.log("\ndiff:\n");
+    console.log(diff);
+    console.log("\n--------------------\n");
     return diff;
 }
 
@@ -75,12 +92,21 @@ async function handleGitCommit(commitMsg?: string) {
     if (!commitMsg) {
         throw new Error("No commit message from openai");
     }
-    console.info("Commit Message:");
-    console.info(commitMsg);
-    console.info("\n--------------------\n");
+    console.log("Generated Commit Message:");
+    console.log(commitMsg);
+    console.log("\n--------------------\n");
     await execHelper("git commit -F -", commitMsg);
-    console.info(`\nIf you need to modify the commit, run gitmsg --amend\n`);
-    console.info(`If you want to regenerate a new commit, run gitmsg --undo && gitmsg\n`);
+    console.log(`\nIf you need to modify the commit, run gitmsg --amend\n`);
+    console.log(`If you want to regenerate a new commit, run gitmsg --undo && gitmsg\n`);
+}
+
+async function handlePrDescription(pullRequestDescription?: string) {
+    if (!pullRequestDescription) {
+        throw new Error("No PR description from openai");
+    }
+    console.log("Generated Pull Request Description:");
+    console.log(pullRequestDescription);
+    console.log("\n--------------------\n");
 }
 
 async function handleGitAmend() {
@@ -88,33 +114,43 @@ async function handleGitAmend() {
 }
 
 async function main() {
-    var args = minimist(process.argv.slice(2));
+    const args = minimist(process.argv.slice(2));
     console.log(args);
     if (args.help) {
-        console.info(`
-        Usage: gitmsg [options]
-        
-        Options:
-        --help, -h      Show this help message
-        --amend, -a     Amend the last commit
-        --undo, -u      Undo the last commit
-        `);
+        console.log(`
+          Usage: gitmsg [options]
+          
+          Options:
+          --help, -h      Show this help message
+          --amend, -a     Amend the last commit
+          --undo, -u      Undo the last commit
+          --pr, -p        Generate a PR description
+          --branch, -b    The branch to compare against (default: origin/main)
+          `);
         process.exit(0);
     }
     if (args.amend) {
-        console.info("Running gitmsg --amend");
+        console.log("Running gitmsg --amend");
         await handleGitAmend();
         process.exit(0);
     }
     if (args.undo) {
-        console.info("Running gitmsg --undo");
+        console.log("Running gitmsg --undo");
         await execHelper("git reset --soft HEAD~1");
         process.exit(0);
     }
-    console.info("Running gitmsg");
-    const diff = await handleGitdiff();
-    const openaiResponse = await getChatCompletion(diff, GITMSG_PROMPT || "");
-    await handleGitCommit(openaiResponse.result.message?.content?.trim());
+    if (args.pr) {
+        const command = await gitDiffBranchCommand(args)
+        console.log(`Running ${command}}`);
+        const diff = await handleGitDiff(command);
+        const { result } = await getChatCompletion(diff, GITMSG_PR_PROMPT || "");
+        await handlePrDescription(result.message?.content?.trim());
+        process.exit(0);
+    }
+    console.log("Running gitmsg");
+    const diff = await handleGitDiff(await GitDiffStagedCommand());
+    const { result } = await getChatCompletion(diff, GITMSG_COMMIT_PROMPT || "");
+    await handleGitCommit(result.message?.content?.trim());
     process.exit(0);
 }
 
