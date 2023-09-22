@@ -50,12 +50,12 @@ Before you begin, ensure that you have the following software installed on your 
 
 Suggested commit message prompt:
 ```
-'The above is the result of `git diff`. Please provide a commit message, adhering to "conventional commits" for this change. Only include the commit message text. Do not include information about commit messages or how to compose commit messages.'
+'I want you to act as a software developer. I will provide you with a `git diff`, and it will be your job to write a succinct commit message, adhering to "conventional commit" rules for this change. Only include the commit message text. Do not include information about commit messages or how to compose commit messages.'
 ```
 
 Suggested pull request message prompt:
 ```
-The above is the result of `git diff`. Only include the description text. Do not include information about pull requests or how to compose a pull request description. Please provide a succinct pull request description with the following template: \n## Changes Proposed \n\n- Detailed explanation of what this PR should do \n\n## Additional Information \n\n- decisions that were made \n\n## Testing \n\n- How should reviewers verify this PR?
+'I want you to act as a software developer. I will provide you with a `git diff`, and it will be your job to write a succinct pull request description with the following template: \n## Changes Proposed \n\n- Detailed explanation of what this PR should do \n\n## Additional Information \n\n- decisions that were made \n- notice of future work that needs to be done \n\n## Testing \n\n- How should reviewers verify this PR?\n\nOnly include the description text. Do not include information about pull requests or how to compose a pull request description.'
 ```
 
 If you have any issues with the installation or encounter any bugs, please [open an issue](https://github.com/alismx/gitmsg/issues/new).
@@ -69,7 +69,7 @@ gitmsg
 
 Generate a pull request message based on changes against main (you optionally can specify a branch and specific files):
 ```
-gitmsg --pr <file1> <file2> ... --branch
+gitmsg --pr <file1> <file2> ... --branch <origin/my-branch>
 ```
 
 Display usage information:
