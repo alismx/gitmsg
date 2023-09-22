@@ -121,11 +121,11 @@ async function main() {
           Usage: gitmsg [options]
           
           Options:
-          --help, -h      Show this help message
-          --amend, -a     Amend the last commit
-          --undo, -u      Undo the last commit
-          --pr, -p        Generate a PR description
-          --branch, -b    The branch to compare against (default: origin/main)
+          --help      Show this help message
+          --amend     Amend the last commit
+          --undo      Undo the last commit
+          --pr        Generate a PR description
+          --branch    The branch to compare against (default: origin/main)
           `);
         process.exit(0);
     }
