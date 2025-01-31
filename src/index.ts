@@ -1,4 +1,4 @@
-import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import { exec } from "child_process";
 import minimist = require("minimist");
 
@@ -13,6 +13,7 @@ const { GITMSG_OPENAI_API_KEY, GITMSG_COMMIT_PROMPT, GITMSG_PR_PROMPT } = proces
  * @param {string} [stdin] - Optional input to be passed to the command via stdin.
  * @returns {Promise<string>} - A Promise that resolves with the command's stdout output.
  */
+
 async function execHelper(command: string, stdin?: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const child = exec(command);
@@ -22,13 +23,18 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
             child.stdin?.end();
         }
         let stdout = "";
+        // Listen for data events on the child process's stdout stream
         child.stdout?.on("data", (data) => {
+            // Append the data to the stdout buffer
             stdout += data;
         });
+        // Listen for the close event on the child process
         child.on("close", (code) => {
+            // If the child process exited with a non-zero code, reject the promise
             if (code !== 0) {
                 reject();
             } else {
+                // Otherwise, resolve the promise with the stdout buffer
                 resolve(stdout);
             }
         });
@@ -36,8 +42,8 @@ async function execHelper(command: string, stdin?: string): Promise<string> {
 }
 
 async function getChatCompletion(diff: string, prompt: string) {
-    const openai = new OpenAIApi(new Configuration({ apiKey: GITMSG_OPENAI_API_KEY }));
-    const messages: ChatCompletionRequestMessage[] = [
+    const openai = new OpenAI({ apiKey: GITMSG_OPENAI_API_KEY });
+    const messages: OpenAI.Chat.CreateChatCompletionRequestMessage[] = [
         {
             role: "user",
             content: diff,
@@ -47,12 +53,9 @@ async function getChatCompletion(diff: string, prompt: string) {
             content: prompt,
         },
     ];
-    const {
-        data: {
-            choices: [result],
-            ...rest
-        },
-    } = await openai.createChatCompletion({
+    const { 
+        choices: [result], ...rest
+    } = await openai.chat.completions.create({
         model: "gpt-4",
         messages,
     });
@@ -73,6 +76,7 @@ async function GitDiffStagedCommand() {
 
 async function handleGitDiff(Command: string) {
     const diff = await execHelper(Command);
+    console.log(`diff: ${diff}`);
     displayDiff(diff);
     return diff;
 }
