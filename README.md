@@ -23,13 +23,13 @@ Before you begin, ensure that you have the following software installed on your 
 
 3. Install dependencies by running the following command:
    ```
-   npm install
+   pnpm install
    ```
    This command will install all the required dependencies listed in the `package.json` file.
 
 4. Build the TypeScript code:
    ```
-   npm run build
+   pnpm run build
    ```
    This command compiles the TypeScript code into JavaScript.
 
