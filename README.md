@@ -11,6 +11,15 @@ Before you begin, ensure that you have the following software installed on your 
 
 ## Installation Steps
 
+### Downloading the package
+
+1. Add a package to your project:
+   ```
+   pnpm add github:alismx/gitmsg#0.0.2
+   ```
+
+### Clone the repository
+
 1. Clone the repository:
    ```
    git clone https://github.com/alismx/gitmsg.git
@@ -33,7 +42,7 @@ Before you begin, ensure that you have the following software installed on your 
    ```
    This command compiles the TypeScript code into JavaScript.
 
-5. Add `/usr/local/bin/gitmsg` file with contents:
+5. Add `~/bin/gitmsg` file with contents:
     
     ```
     #!/bin/sh

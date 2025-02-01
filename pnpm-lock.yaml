@@ -24,11 +24,18 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
     devDependencies:
+      '@alismx/gitmsg':
+        specifier: github:alismx/gitmsg#0.0.2
+        version: https://codeload.github.com/alismx/gitmsg/tar.gz/f99bd09c32511173bebdcafb2ad1e130168d4754
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
 
 packages:
+
+  '@alismx/gitmsg@https://codeload.github.com/alismx/gitmsg/tar.gz/f99bd09c32511173bebdcafb2ad1e130168d4754':
+    resolution: {tarball: https://codeload.github.com/alismx/gitmsg/tar.gz/f99bd09c32511173bebdcafb2ad1e130168d4754}
+    version: 0.0.2
 
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
@@ -142,6 +149,18 @@ packages:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
 snapshots:
+
+  '@alismx/gitmsg@https://codeload.github.com/alismx/gitmsg/tar.gz/f99bd09c32511173bebdcafb2ad1e130168d4754':
+    dependencies:
+      '@types/minimist': 1.2.5
+      '@types/node': 18.19.74
+      minimist: 1.2.8
+      openai: 4.82.0
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - encoding
+      - ws
+      - zod
 
   '@types/minimist@1.2.5': {}
 
